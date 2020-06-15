@@ -16,6 +16,10 @@ import XMonad.Util.Run
 -- Used to show workspaces in xmobar
 import XMonad.Hooks.DynamicLog
 import XMonad.Hooks.ManageDocks
+import XMonad.Hooks.UrgencyHook
+import XMonad.Util.NamedWindows
+
+import XMonad.Hooks.DynamicBars
 
 import XMonad.Layout.Tabbed
 import XMonad.Layout.Spacing
@@ -250,6 +254,7 @@ myManageHook = composeAll
 -- combine event hooks use mappend or mconcat from Data.Monoid.
 --
 myEventHook = mempty
+	<> dynStatusBarEventHook barCreator barDestroyer
 
 ------------------------------------------------------------------------
 	-- Status bars and logging
@@ -257,7 +262,10 @@ myEventHook = mempty
 -- Perform an arbitrary action on each internal state change or X event.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
-myLogHook = return ()
+myLogHook = multiPP myPP myPP
+                { ppCurrent = xmobarStrip . ppCurrent xmobarPP
+                , ppExtras = map (fmap $ fmap xmobarStrip) $ ppExtras myPP
+                }
 
 ------------------------------------------------------------------------
 	-- Startup hook
@@ -267,33 +275,81 @@ myLogHook = return ()
 -- per-workspace layout choices.
 --
 -- By default, do nothing.
+barCreator sid = let
+	sid' = show $ fromEnum sid in
+	spawnPipe ("xmobar --screen " ++ sid' ++ " .xmonad/xmobarrc")
+barDestroyer = return ()
+
 myStartupHook = do
 	spawnOnce "nitrogen --restore &"
 	spawnOnce "picom --config ~/.config/picom/picom.conf &"
+	dynStatusBarStartup barCreator barDestroyer
 
 ------------------------------------------------------------------------
 	-- Now run xmonad with all the defaults we set up.
 
+
+myPP = xmobarPP
+	{
+	--ppSort = mySort
+	 ppSep = "  "
+	, ppExtras = [logWsMeta, logStack, logWindows]
+	--, ppOrder = \(ws:_:_:meta:stack:wins:_) -> [ws, meta, stack, wins]
+	, ppOrder = \(ws:_:_:meta:_:wins:_) -> [ws, meta, wins]
+	}
+
+logWsMeta = do
+	-- dir <- currentTopicDir myTopicConfig
+	layout <- gets (W.layout . W.workspace . W.current . windowset)
+	--liftIO $ putStrLn $ description layout
+	-- let wd = if isPrefixOf "/" dir then "" else "~/"
+	let lname = head $ words $ description layout
+	return $ Just $ "[ " ++ " | " ++ lname ++ " ]"
+logStack = do
+	stack <- gets (W.stack . W.workspace . W.current . windowset)
+	return . Just $ show (fmap W.up stack, fmap W.focus stack, fmap W.down stack)
+logWindows = do
+	stack <- gets (W.stack . W.workspace . W.current . windowset)
+	names <- mapM (fmap show . getName ) $ W.integrate' stack
+	urgs <- readUrgents
+	let urgents = map (flip elem urgs) $ W.integrate' stack
+	let focus = maybe 0 (length . W.up) stack
+	return . Just . unwords . map (formatTitle focus) $ zip3 names urgents [0..]
+
+formatTitle focus (n,u,wid) = (if u
+		then urgent . xmobarStrip -- TODO just one formatting step
+		else id)
+	. (if focus == wid
+		then wrap (white "[") (white "]") . green . unwords
+		else unwords . (\t -> (grey . head) t : tail t))
+	. fallback . words . shorten 50 . xmobarStrip $ n -- TODO fallback before words? need a window to reproduce this with though
+	where
+		fallback t = if null t then ["untitled"] else t
+		green = xmobarColor "green" ""
+		white = xmobarColor "white" ""
+		grey = xmobarColor "grey" ""
+		urgent = xmobarColor "red" "yellow"
 -- Run xmonad with the settings you specify. No need to modify this.
 --
 main = do
 	-- start xmobar
-	xmproc0 <- spawnPipe "xmobar -x 0 ~/.xmonad/xmobarrc"
-	xmproc1 <- spawnPipe "xmobar -x 1 ~/.xmonad/xmobarrc"
-	xmproc2 <- spawnPipe "xmobar -x 2 ~/.xmonad/xmobarrc"
+	-- xmproc0 <- spawnPipe "xmobar -x 0 ~/.xmonad/xmobarrc"
+	-- xmproc1 <- spawnPipe "xmobar -x 1 ~/.xmonad/xmobarrc"
+	-- xmproc2 <- spawnPipe "xmobar -x 2 ~/.xmonad/xmobarrc"
 	-- start xmonad
-	xmonad $ docks defaults {
-	logHook = dynamicLogWithPP xmobarPP
-	                        { ppOutput = \x -> hPutStrLn xmproc0 x  >> hPutStrLn xmproc1 x  >> hPutStrLn xmproc2 x
-                        , ppCurrent = xmobarColor "#c3e88d" "" . wrap "[" "]" -- Current workspace in xmobar
-                        , ppVisible = xmobarColor "#c3e88d" ""                -- Visible but not current workspace
-                        , ppHidden = xmobarColor "#82AAFF" "" . wrap "*" ""   -- Hidden workspaces in xmobar
-                        , ppHiddenNoWindows = xmobarColor "#F07178" ""        -- Hidden workspaces (no windows)
-                        , ppTitle = xmobarColor "#d0d0d0" "" . shorten 60     -- Title of active window in xmobar
-                        , ppSep =  "<fc=#666666> | </fc>"                     -- Separators in xmobar
-                        , ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!"  -- Urgent workspace
-                        , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]
-                        }
+	xmonad $ docks defaults
+		-- {
+	-- logHook = dynamicLogWithPP xmobarPP
+	--                         -- { ppOutput = \x -> hPutStrLn xmproc0 x  >> hPutStrLn xmproc1 x  >> hPutStrLn xmproc2 x
+                        -- , ppCurrent = xmobarColor "#c3e88d" "" . wrap "[" "]" -- Current workspace in xmobar
+                        -- , ppVisible = xmobarColor "#c3e88d" ""                -- Visible but not current workspace
+                        -- , ppHidden = xmobarColor "#82AAFF" "" . wrap "*" ""   -- Hidden workspaces in xmobar
+                        -- , ppHiddenNoWindows = xmobarColor "#F07178" ""        -- Hidden workspaces (no windows)
+                        -- , ppTitle = xmobarColor "#d0d0d0" "" . shorten 60     -- Title of active window in xmobar
+                        -- , ppSep =  "<fc=#666666> | </fc>"                     -- Separators in xmobar
+                        -- , ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!"  -- Urgent workspace
+                        -- , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]
+                        -- }
 
 		-- {  ppOutput = \x -> hPutStrLn xmproc0 x  >> hPutStrLn xmproc1 x  >> hPutStrLn xmproc2 x
 		--   , ppCurrent = xmobarColor "yellow" "" . wrap "[" "]"
@@ -302,7 +358,7 @@ main = do
 		--   , ppVisible = wrap "(" ")"
 		--   , ppUrgent = xmobarColor "red" "yellow"
 		--   }
-	 }
+	 -- }
 	--this adds a fixup for docks
 
 -- A structure containing your configuration settings, overriding
