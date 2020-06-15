@@ -278,17 +278,30 @@ myStartupHook = do
 --
 main = do
 	-- start xmobar
-	xmproc <- spawnPipe "xmobar -x 0 ~/.xmonad/xmobarrc"
+	xmproc0 <- spawnPipe "xmobar -x 0 ~/.xmonad/xmobarrc"
+	xmproc1 <- spawnPipe "xmobar -x 1 ~/.xmonad/xmobarrc"
+	xmproc2 <- spawnPipe "xmobar -x 2 ~/.xmonad/xmobarrc"
 	-- start xmonad
 	xmonad $ docks defaults {
 	logHook = dynamicLogWithPP xmobarPP
-		{ ppOutput = hPutStrLn xmproc
-		  , ppCurrent = xmobarColor "yellow" "" . wrap "[" "]"
-		  , ppHiddenNoWindows = xmobarColor "grey" ""
-		  , ppTitle = xmobarColor "green" "" . shorten 40
-		  , ppVisible = wrap "(" ")"
-		  , ppUrgent = xmobarColor "red" "yellow"
-		  }
+	                        { ppOutput = \x -> hPutStrLn xmproc0 x  >> hPutStrLn xmproc1 x  >> hPutStrLn xmproc2 x
+                        , ppCurrent = xmobarColor "#c3e88d" "" . wrap "[" "]" -- Current workspace in xmobar
+                        , ppVisible = xmobarColor "#c3e88d" ""                -- Visible but not current workspace
+                        , ppHidden = xmobarColor "#82AAFF" "" . wrap "*" ""   -- Hidden workspaces in xmobar
+                        , ppHiddenNoWindows = xmobarColor "#F07178" ""        -- Hidden workspaces (no windows)
+                        , ppTitle = xmobarColor "#d0d0d0" "" . shorten 60     -- Title of active window in xmobar
+                        , ppSep =  "<fc=#666666> | </fc>"                     -- Separators in xmobar
+                        , ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!"  -- Urgent workspace
+                        , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]
+                        }
+
+		-- {  ppOutput = \x -> hPutStrLn xmproc0 x  >> hPutStrLn xmproc1 x  >> hPutStrLn xmproc2 x
+		--   , ppCurrent = xmobarColor "yellow" "" . wrap "[" "]"
+		--   , ppHiddenNoWindows = xmobarColor "grey" ""
+		--   , ppTitle = xmobarColor "green" "" . shorten 40
+		--   , ppVisible = wrap "(" ")"
+		--   , ppUrgent = xmobarColor "red" "yellow"
+		--   }
 	 }
 	--this adds a fixup for docks
 
