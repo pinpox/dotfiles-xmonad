@@ -17,12 +17,12 @@ Config {
 	   , iconRoot = "."
 	   , allDesktops = True
 	   , overrideRedirect = True
-	   , commands = [ Run Weather "EGPF" ["-t","<station>: <tempC>C",
+	   , commands = [ Run Weather "EDDK" ["-t","<station>: <tempC>C",
 		"-L","18","-H","25",
 		"--normal","green",
 		"--high","red",
 		"--low","lightblue"] 36000
-				 , Run Network "eth0" ["-L","0","-H","32",
+				 , Run Network "eno1" ["-L","0","-H","32",
 		"--normal","green","--high","red"] 10
 				 , Run Network "eth1" ["-L","0","-H","32",
 		"--normal","green","--high","red"] 10
@@ -34,7 +34,5 @@ Config {
 				 ]
 	   , sepChar = "%"
 	   , alignSep = "}{"
-	   , template = "%UnsafeStdinReader% %cpu% | %memory% * %swap% | %eth0% - %eth1% }\
-				 \{ <fc=#ee9a00>%date%</fc>| %EGPF%"
-	   }
-
+	   , template = "%UnsafeStdinReader% %cpu% | %memory% | %eno1% }\
+				 \{ %EDDK% | <fc=#ee9a00>%date%</fc> "}
