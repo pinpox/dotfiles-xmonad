@@ -7,30 +7,51 @@
 -- Normally, you'd only override those defaults you care about.
 --
 
-import XMonad
-import Data.Monoid
-import System.Exit
-import XMonad.Util.SpawnOnce
-import XMonad.Util.Run
+import           Data.Monoid
+import           System.Exit
+import           XMonad
+import           XMonad.Util.Run
+import           XMonad.Util.SpawnOnce
 
 -- Used to show workspaces in xmobar
-import XMonad.Hooks.DynamicLog
-import XMonad.Hooks.ManageDocks
-import XMonad.Hooks.UrgencyHook
-import XMonad.Util.NamedWindows
+import           XMonad.Hooks.DynamicLog
+import           XMonad.Hooks.ManageDocks
+import           XMonad.Hooks.UrgencyHook
+import           XMonad.Util.NamedWindows
 
 -- Let pointer follow focus
-import XMonad.Actions.UpdatePointer
+import           XMonad.Actions.UpdatePointer
 
-import XMonad.Hooks.DynamicBars
+import           XMonad.Hooks.DynamicBars
 
-import XMonad.Layout.Tabbed
-import XMonad.Layout.Spacing
-import XMonad.Layout.NoBorders
-import XMonad.Layout.ImageButtonDecoration
+import           XMonad.Layout.ImageButtonDecoration
+import           XMonad.Layout.NoBorders
+import           XMonad.Layout.Spacing
+import           XMonad.Layout.Tabbed
 
-import qualified XMonad.StackSet as W
-import qualified Data.Map        as M
+import qualified Data.Map                            as M
+import qualified XMonad.StackSet                     as W
+
+-- Colors (base16-onedark)
+myColorBase00  = "#282c34" -- black, background
+myColorBase01  = "#353b45" -- grey 1
+myColorBase02  = "#3e4451" -- grey 2
+myColorBase03  = "#545862" -- grey 3
+myColorBase04  = "#565c64" -- grey 4
+myColorBase05  = "#abb2bf" -- white, foreground
+myColorBase06  = "#b6bdca" -- grey 5
+myColorBase07  = "#c8ccd4" -- grey 6
+myColorBase08  = "#e06c75" -- red
+myColorBase09  = "#d19a66" -- orange
+myColorBase0A  = "#e5c07b" -- yellow
+myColorBase0B  = "#98c379" -- green
+myColorBase0C  = "#56b6c2" -- teal
+myColorBase0D  = "#61afef" -- blue
+myColorBase0E  = "#c678dd" -- purple
+myColorBase0F  = "#be5046" -- darkred
+
+-- Font
+myFontName = "xft:Roboto Mono:size=7:antialias=true:hinting=true"
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
@@ -69,8 +90,6 @@ myWorkspaces    = ["1","2","3","4","5","6","7","8","9"]
 
 -- Border colors for unfocused and focused windows, respectively.
 --
-myNormalBorderColor  = "#dddddd"
-myFocusedBorderColor = "#ff0000"
 
 ------------------------------------------------------------------------
 	-- Key bindings. Add, modify or remove key bindings here.
@@ -81,14 +100,15 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 	[ ((modm,               xK_Return), spawn $ XMonad.terminal conf)
 
 	-- launch rofi
-  , ((modm,               xK_p     ), spawn "rofi -show run -lines 7 -eh 1 -bw 0  -fullscreen -padding 200")
+ , ((modm,               xK_p     ), spawn "rofi -show run -lines 7 -eh 1 -bw 0  -fullscreen -padding 200")
 
-	 , ((modm .|. shiftMask, xK_p     ), spawn "rofi-pass -show combi -lines 7 -eh 3 -bw 0 -matching fuzzy")
+    -- launch rofi-pass
+ , ((modm .|. shiftMask, xK_p     ), spawn "rofi-pass -show combi -lines 7 -eh 3 -bw 0 -matching fuzzy")
 
 	-- close focused window
  , ((modm .|. shiftMask, xK_q     ), kill)
 
-	 -- Rotate through the available layout algorithms
+	-- Rotate through the available layout algorithms
  , ((modm,               xK_space ), sendMessage NextLayout)
 
 	--  Reset the layouts on the current workspace to default
@@ -107,31 +127,31 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
  , ((modm,               xK_k     ), windows W.focusUp  )
 
 	-- Move focus to the master window
- , ((modm,               xK_m     ), windows W.focusMaster  )
+ , ((modm,               xK_m     ), windows W.focusMaster)
 
 	-- Swap the focused window and the master window
-	--, ((modm,               xK_Return), windows W.swapMaster)
+    --, ((modm,               xK_Return), windows W.swapMaster)
 
 	-- Swap the focused window with the next window
- , ((modm .|. shiftMask, xK_j     ), windows W.swapDown  )
+ , ((modm .|. shiftMask, xK_j     ), windows W.swapDown)
 
 	-- Swap the focused window with the previous window
- , ((modm .|. shiftMask, xK_k     ), windows W.swapUp    )
+ , ((modm .|. shiftMask, xK_k     ), windows W.swapUp )
 
 	-- Shrink the master area
  , ((modm,               xK_h     ), sendMessage Shrink)
 
 	-- Expand the master area
-	  , ((modm,               xK_l     ), sendMessage Expand)
+ , ((modm,               xK_l     ), sendMessage Expand)
 
 	-- Push window back into tiling
-   , ((modm,               xK_t     ), withFocused $ windows . W.sink)
+ , ((modm,               xK_t     ), withFocused $ windows . W.sink)
 
 	-- Increment the number of windows in the master area
-   , ((modm              , xK_comma ), sendMessage (IncMasterN 1))
+ , ((modm              , xK_comma ), sendMessage (IncMasterN 1))
 
-	-- Deincrement the number of windows in the master area
-   , ((modm              , xK_period), sendMessage (IncMasterN (-1)))
+    -- Deincrement the number of windows in the master area
+ , ((modm              , xK_period), sendMessage (IncMasterN (-1)))
 
 	-- Toggle the status bar gap
 	-- Use this binding with avoidStruts from Hooks.ManageDocks.
@@ -143,30 +163,21 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 	-- , ((modm .|. shiftMask, xK_q     ), io (exitWith ExitSuccess))
 
 	-- Restart xmonad
-   , ((modm              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
+ , ((modm              , xK_q     ), spawn "xmonad --recompile; xmonad --restart")
 
-	-- Run xmessage with a summary of the default keybindings (useful for beginners)
-	  , ((modm .|. shiftMask, xK_slash ), spawn ("echo \"" ++ help ++ "\" | xmessage -file -"))
  ]
 	++
-
-	--
 	-- mod-[1..9], Switch to workspace N
 	-- mod-shift-[1..9], Move client to workspace N
-	--
 	[((m .|. modm, k), windows $ f i)
    | (i, k) <- zip (XMonad.workspaces conf) [xK_1 .. xK_9]
    , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
 	++
-
-	--
 	-- mod-{w,e,r}, Switch to physical/Xinerama screens 1, 2, or 3
 	-- mod-shift-{w,e,r}, Move client to screen 1, 2, or 3
-	--
 	[((m .|. modm, key), screenWorkspace sc >>= flip whenJust (windows . f))
    | (key, sc) <- zip [xK_w, xK_e, xK_r] [0..]
    , (f, m) <- [(W.view, 0), (W.shift, shiftMask)]]
-
 
 ------------------------------------------------------------------------
 	-- Mouse bindings: default actions bound to mouse events
@@ -174,7 +185,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 
 	-- mod-button1, Set the window to floating mode and move by dragging
-	[ ((modm, button1), (\w -> focus w >> mouseMoveWindow w
+	[
+	((modm, button1), (\w -> focus w >> mouseMoveWindow w
 									   >> windows W.shiftMaster))
 
 	-- mod-button2, Raise the window to the top of the stack
@@ -198,16 +210,23 @@ myMouseBindings (XConfig {XMonad.modMask = modm}) = M.fromList $
 -- The available layouts.  Note that each layout is separated by |||,
 -- which denotes layout choice.
 --
-myTabConfig = def { activeColor = "#556064"
-  , inactiveColor = "#2F3D44"
-  , urgentColor = "#FDF6E3"
-  , activeBorderColor = "#454948"
-  , inactiveBorderColor = "#454948"
-  , urgentBorderColor = "#268BD2"
-  , activeTextColor = "#80FFF9"
-  , inactiveTextColor = "#1ABC9C"
-  , urgentTextColor = "#1ABC9C"
-  , fontName = "xft:Noto Sans CJK:size=10:antialias=true"
+myTabConfig = def {
+    -- Border
+    activeBorderColor = myColorBase0D
+  , inactiveBorderColor = myColorBase03
+  , urgentBorderColor = myColorBase0F
+
+  -- Background
+  , activeColor = myColorBase0D
+  , inactiveColor = myColorBase00
+  , urgentColor = myColorBase08
+
+  -- Foreground
+  , activeTextColor = myColorBase00
+  , inactiveTextColor = myColorBase0D
+  , urgentTextColor = myColorBase00
+
+  , fontName = myFontName
   }
 
 myLayout = smartBorders $ avoidStruts $
@@ -219,7 +238,7 @@ myLayout = smartBorders $ avoidStruts $
 	 -- The default number of windows in the master pane
 	 nmaster = 1
 
-	 -- Default proportion of screen occupied by master pane
+	 -- Default proportion of screen occupied by master pane (aprox. golden ratio)
 	 ratio   = 61/100
 
 	 -- Percent of screen to increment by when resizing panes
@@ -279,7 +298,7 @@ myLogHook = updatePointer (0.5, 0.5) (0, 0) >>  multiPP myPP myPP
 -- By default, do nothing.
 barCreator sid = let
 	sid' = show $ fromEnum sid in
-	spawnPipe ("xmobar --screen " ++ sid' ++ " .xmonad/xmobarrc")
+	spawnPipe ("xmobar --screen " ++ sid' ++ " ~/.xmonad/xmobarrc")
 barDestroyer = return ()
 
 myStartupHook = do
@@ -349,8 +368,8 @@ defaults = def {
 		borderWidth        = myBorderWidth,
 		modMask            = myModMask,
 		workspaces         = myWorkspaces,
-		normalBorderColor  = myNormalBorderColor,
-		focusedBorderColor = myFocusedBorderColor,
+		normalBorderColor  = myColorBase04,
+		focusedBorderColor = myColorBase0D,
 
 	  -- key bindings
 		keys               = myKeys,
@@ -364,53 +383,3 @@ defaults = def {
 		startupHook        = myStartupHook
 			   }
 
--- | Finally, a copy of the default bindings in simple textual tabular format.
-help :: String
-help = unlines ["The default modifier key is 'alt'. Default keybindings:",
-	"",
-	"-- launching and killing programs",
-	"mod-Shift-Enter  Launch xterminal",
-	"mod-p            Launch dmenu",
-	"mod-Shift-p      Launch gmrun",
-	"mod-Shift-c      Close/kill the focused window",
-	"mod-Space        Rotate through the available layout algorithms",
-	"mod-Shift-Space  Reset the layouts on the current workSpace to default",
-	"mod-n            Resize/refresh viewed windows to the correct size",
-	"",
-	"-- move focus up or down the window stack",
-	"mod-Tab        Move focus to the next window",
-	"mod-Shift-Tab  Move focus to the previous window",
-	"mod-j          Move focus to the next window",
-	"mod-k          Move focus to the previous window",
-	"mod-m          Move focus to the master window",
-	"",
-	"-- modifying the window order",
-	"mod-Return   Swap the focused window and the master window",
-	"mod-Shift-j  Swap the focused window with the next window",
-	"mod-Shift-k  Swap the focused window with the previous window",
-	"",
-	"-- resizing the master/slave ratio",
-	"mod-h  Shrink the master area",
-	"mod-l  Expand the master area",
-	"",
-	"-- floating layer support",
-	"mod-t  Push window back into tiling; unfloat and re-tile it",
-	"",
-	"-- increase or decrease number of windows in the master area",
-	"mod-comma  (mod-,)   Increment the number of windows in the master area",
-	"mod-period (mod-.)   Deincrement the number of windows in the master area",
-	"",
-	"-- quit, or restart",
-	"mod-Shift-q  Quit xmonad",
-	"mod-q        Restart xmonad",
-	"mod-[1..9]   Switch to workSpace N",
-	"",
-	"-- Workspaces & screens",
-	"mod-Shift-[1..9]   Move client to workspace N",
-	"mod-{w,e,r}        Switch to physical/Xinerama screens 1, 2, or 3",
-	"mod-Shift-{w,e,r}  Move client to screen 1, 2, or 3",
-	"",
-	"-- Mouse bindings: default actions bound to mouse events",
-	"mod-button1  Set the window to floating mode and move by dragging",
-	"mod-button2  Raise the window to the top of the stack",
-	"mod-button3  Set the window to floating mode and resize by dragging"]
