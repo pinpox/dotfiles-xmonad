@@ -19,6 +19,9 @@ import           XMonad.Hooks.ManageDocks
 import           XMonad.Hooks.UrgencyHook
 import           XMonad.Util.NamedWindows
 
+-- For fullscreen video
+import XMonad.Hooks.EwmhDesktops
+
 -- Let pointer follow focus
 import           XMonad.Actions.UpdatePointer
 
@@ -276,6 +279,7 @@ myManageHook = composeAll
 --
 myEventHook = mempty
 	<> dynStatusBarEventHook barCreator barDestroyer
+	<+> fullscreenEventHook
 
 ------------------------------------------------------------------------
 	-- Status bars and logging
