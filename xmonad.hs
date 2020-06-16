@@ -323,11 +323,6 @@ myPP = xmobarPP
 	}
 
 logWsMeta = do
-	-- dir <- currentTopicDir myTopicConfig
-	-- layout <- gets (W.layout . W.workspace . W.current . windowset)
-	--liftIO $ putStrLn $ description layout
-	-- let wd = if isPrefixOf "/" dir then "" else "~/"
-	-- let lname = description layout
 	return $ Just $ "[  ]"
 logStack = do
 	stack <- gets (W.stack . W.workspace . W.current . windowset)
@@ -335,28 +330,12 @@ logStack = do
 logWindows = do
 	stack <- gets (W.stack . W.workspace . W.current . windowset)
 	names <- mapM (fmap show . getName ) $ W.integrate' stack
-	urgs <- readUrgents
-	let urgents = map (flip elem urgs) $ W.integrate' stack
-	let focus = maybe 0 (length . W.up) stack
-	return . Just . unwords . map (formatTitle focus) $ zip3 names urgents [0..]
+	return . Just . unwords . map (formatTitle focus) $ zip3 names [0..] [0..]
 
-formatTitle focus (n,u,wid) = (if u
-		then urgent . xmobarStrip -- TODO just one formatting step
-		else id)
-	. (if focus == wid
-		then wrap (white "[") (white "]") . green . unwords
-		else unwords . (\t -> (grey . head) t : tail t))
-	. fallback . words . shorten 50 . xmobarStrip $ n -- TODO fallback before words? need a window to reproduce this with though
-	where
-		fallback t = if null t then ["untitled"] else t
-		green = xmobarColor "green" ""
-		white = xmobarColor "white" ""
-		grey = xmobarColor "grey" ""
-		urgent = xmobarColor "red" "yellow"
+formatTitle focus (n,u,wid) = ""
 
 -- Run xmonad with the settings you specify. No need to modify this.
-main = do
-	xmonad $ docks defaults
+main = xmonad $ docks defaults
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
