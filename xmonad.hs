@@ -76,11 +76,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
 	-- launch a terminal
 	[ ((modm,               xK_Return), spawn $ XMonad.terminal conf)
 
-	-- launch dmenu
-  , ((modm,               xK_p     ), spawn "dmenu_run")
+	-- launch rofi
+  , ((modm,               xK_p     ), spawn "rofi -show run -lines 7 -eh 1 -bw 0  -fullscreen -padding 200")
 
-	-- launch gmrun
-  , ((modm .|. shiftMask, xK_p     ), spawn "gmrun")
+	 , ((modm .|. shiftMask, xK_p     ), spawn "rofi-pass -show combi -lines 7 -eh 3 -bw 0 -matching fuzzy")
 
 	-- close focused window
  , ((modm .|. shiftMask, xK_q     ), kill)
@@ -281,6 +280,7 @@ barCreator sid = let
 barDestroyer = return ()
 
 myStartupHook = do
+	spawnOnce "~/.xmonad/autostart.sh &"
 	spawnOnce "nitrogen --restore &"
 	spawnOnce "picom --config ~/.config/picom/picom.conf &"
 	dynStatusBarStartup barCreator barDestroyer
@@ -291,11 +291,9 @@ myStartupHook = do
 
 myPP = xmobarPP
 	{
-	--ppSort = mySort
-	 ppSep = "  "
+	ppSep = "  "
 	, ppExtras = [logWsMeta, logStack, logWindows]
-	--, ppOrder = \(ws:_:_:meta:stack:wins:_) -> [ws, meta, stack, wins]
-	, ppOrder = \(ws:_:_:meta:_:wins:_) -> [ws, meta, wins]
+	, ppOrder = \(ws:_:_:_:_:wins:_) -> [ws, wins]
 	}
 
 logWsMeta = do
@@ -304,7 +302,7 @@ logWsMeta = do
 	--liftIO $ putStrLn $ description layout
 	-- let wd = if isPrefixOf "/" dir then "" else "~/"
 	let lname = head $ words $ description layout
-	return $ Just $ "[ " ++ " | " ++ lname ++ " ]"
+	return $ Just $ "[  ]"
 logStack = do
 	stack <- gets (W.stack . W.workspace . W.current . windowset)
 	return . Just $ show (fmap W.up stack, fmap W.focus stack, fmap W.down stack)
@@ -329,37 +327,10 @@ formatTitle focus (n,u,wid) = (if u
 		white = xmobarColor "white" ""
 		grey = xmobarColor "grey" ""
 		urgent = xmobarColor "red" "yellow"
--- Run xmonad with the settings you specify. No need to modify this.
---
-main = do
-	-- start xmobar
-	-- xmproc0 <- spawnPipe "xmobar -x 0 ~/.xmonad/xmobarrc"
-	-- xmproc1 <- spawnPipe "xmobar -x 1 ~/.xmonad/xmobarrc"
-	-- xmproc2 <- spawnPipe "xmobar -x 2 ~/.xmonad/xmobarrc"
-	-- start xmonad
-	xmonad $ docks defaults
-		-- {
-	-- logHook = dynamicLogWithPP xmobarPP
-	--                         -- { ppOutput = \x -> hPutStrLn xmproc0 x  >> hPutStrLn xmproc1 x  >> hPutStrLn xmproc2 x
-                        -- , ppCurrent = xmobarColor "#c3e88d" "" . wrap "[" "]" -- Current workspace in xmobar
-                        -- , ppVisible = xmobarColor "#c3e88d" ""                -- Visible but not current workspace
-                        -- , ppHidden = xmobarColor "#82AAFF" "" . wrap "*" ""   -- Hidden workspaces in xmobar
-                        -- , ppHiddenNoWindows = xmobarColor "#F07178" ""        -- Hidden workspaces (no windows)
-                        -- , ppTitle = xmobarColor "#d0d0d0" "" . shorten 60     -- Title of active window in xmobar
-                        -- , ppSep =  "<fc=#666666> | </fc>"                     -- Separators in xmobar
-                        -- , ppUrgent = xmobarColor "#C45500" "" . wrap "!" "!"  -- Urgent workspace
-                        -- , ppOrder  = \(ws:l:t:ex) -> [ws,l]++ex++[t]
-                        -- }
 
-		-- {  ppOutput = \x -> hPutStrLn xmproc0 x  >> hPutStrLn xmproc1 x  >> hPutStrLn xmproc2 x
-		--   , ppCurrent = xmobarColor "yellow" "" . wrap "[" "]"
-		--   , ppHiddenNoWindows = xmobarColor "grey" ""
-		--   , ppTitle = xmobarColor "green" "" . shorten 40
-		--   , ppVisible = wrap "(" ")"
-		--   , ppUrgent = xmobarColor "red" "yellow"
-		--   }
-	 -- }
-	--this adds a fixup for docks
+-- Run xmonad with the settings you specify. No need to modify this.
+main = do
+	xmonad $ docks defaults
 
 -- A structure containing your configuration settings, overriding
 -- fields in the default config. Any you don't override, will
