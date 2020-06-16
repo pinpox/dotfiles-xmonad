@@ -19,6 +19,9 @@ import XMonad.Hooks.ManageDocks
 import XMonad.Hooks.UrgencyHook
 import XMonad.Util.NamedWindows
 
+-- Let pointer follow focus
+import XMonad.Actions.UpdatePointer
+
 import XMonad.Hooks.DynamicBars
 
 import XMonad.Layout.Tabbed
@@ -204,8 +207,8 @@ myTabConfig = def { activeColor = "#556064"
   , activeTextColor = "#80FFF9"
   , inactiveTextColor = "#1ABC9C"
   , urgentTextColor = "#1ABC9C"
-				  , fontName = "xft:Noto Sans CJK:size=10:antialias=true"
-				  }
+  , fontName = "xft:Noto Sans CJK:size=10:antialias=true"
+  }
 
 myLayout = smartBorders $ avoidStruts $
 		((spacing 5 $ tabbed shrinkText myTabConfig) ||| tiled ||| Mirror tiled ||| Full)
@@ -217,7 +220,7 @@ myLayout = smartBorders $ avoidStruts $
 	 nmaster = 1
 
 	 -- Default proportion of screen occupied by master pane
-	 ratio   = 1/2
+	 ratio   = 61/100
 
 	 -- Percent of screen to increment by when resizing panes
 	 delta   = 3/100
@@ -261,7 +264,7 @@ myEventHook = mempty
 -- Perform an arbitrary action on each internal state change or X event.
 -- See the 'XMonad.Hooks.DynamicLog' extension for examples.
 --
-myLogHook = multiPP myPP myPP
+myLogHook = updatePointer (0.5, 0.5) (0, 0) >>  multiPP myPP myPP
                 { ppCurrent = xmobarStrip . ppCurrent xmobarPP
                 , ppExtras = map (fmap $ fmap xmobarStrip) $ ppExtras myPP
                 }
