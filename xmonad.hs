@@ -301,10 +301,10 @@ myPP = xmobarPP
 
 logWsMeta = do
 	-- dir <- currentTopicDir myTopicConfig
-	layout <- gets (W.layout . W.workspace . W.current . windowset)
+	-- layout <- gets (W.layout . W.workspace . W.current . windowset)
 	--liftIO $ putStrLn $ description layout
 	-- let wd = if isPrefixOf "/" dir then "" else "~/"
-	let lname = head $ words $ description layout
+	-- let lname = description layout
 	return $ Just $ "[  ]"
 logStack = do
 	stack <- gets (W.stack . W.workspace . W.current . windowset)
