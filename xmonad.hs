@@ -23,6 +23,7 @@ import XMonad.Hooks.DynamicBars
 
 import XMonad.Layout.Tabbed
 import XMonad.Layout.Spacing
+import XMonad.Layout.NoBorders
 import XMonad.Layout.ImageButtonDecoration
 
 import qualified XMonad.StackSet as W
@@ -206,12 +207,11 @@ myTabConfig = def { activeColor = "#556064"
 				  , fontName = "xft:Noto Sans CJK:size=10:antialias=true"
 				  }
 
-myLayout = avoidStruts $
-	spacingRaw False (Border 10 0 10 0) True (Border 0 10 0 10 ) True $
-		(tabbed shrinkText myTabConfig ||| tiled ||| Mirror tiled ||| Full)
+myLayout = smartBorders $ avoidStruts $
+		((spacing 5 $ tabbed shrinkText myTabConfig) ||| tiled ||| Mirror tiled ||| Full)
 			where
 				-- default tiling algorithm partitions the screen into two panes
-	 tiled   = Tall nmaster delta ratio
+	 tiled   = spacing 5 $ Tall nmaster delta ratio
 
 	 -- The default number of windows in the master pane
 	 nmaster = 1
