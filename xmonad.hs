@@ -105,6 +105,8 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
     -- launch rofi-pass
  , ((modm .|. shiftMask, xK_p     ), spawn "rofi-pass -show combi -lines 7 -eh 3 -bw 0 -matching fuzzy")
 
+-- TODO add screenshot bind
+-- import png:- | xclip -selection clipboard -t image/png
 	-- close focused window
  , ((modm .|. shiftMask, xK_q     ), kill)
 
@@ -112,10 +114,10 @@ myKeys conf@(XConfig {XMonad.modMask = modm}) = M.fromList $
  , ((modm,               xK_space ), sendMessage NextLayout)
 
 	--  Reset the layouts on the current workspace to default
- , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
+ -- , ((modm .|. shiftMask, xK_space ), setLayout $ XMonad.layoutHook conf)
 
 	-- Resize viewed windows to the correct size
- , ((modm,               xK_n     ), refresh)
+ -- , ((modm,               xK_n     ), refresh)
 
 	-- Move focus to the next window
  , ((modm,               xK_Tab   ), windows W.focusDown)
