@@ -1,10 +1,5 @@
 --
--- xmonad example config file.
---
--- A template showing all available configuration hooks,
--- and how to override the defaults in your own xmonad.hs conf file.
---
--- Normally, you'd only override those defaults you care about.
+-- xmonad config file.
 --
 
 import           Data.Monoid
@@ -12,6 +7,9 @@ import           System.Exit
 import           XMonad
 import           XMonad.Util.Run
 import           XMonad.Util.SpawnOnce
+
+-- Window tranparency
+import XMonad.Hooks.FadeInactive
 
 -- Used to show workspaces in xmobar
 import           XMonad.Hooks.DynamicLog
@@ -58,7 +56,6 @@ myFontName = "xft:Roboto Mono:size=7:antialias=true:hinting=true"
 
 -- The preferred terminal program, which is used in a binding below and by
 -- certain contrib modules.
---
 myTerminal      = "alacritty"
 
 -- Whether focus follows the mouse pointer.
@@ -291,6 +288,7 @@ myLogHook = updatePointer (0.5, 0.5) (0, 0) >>  multiPP myPP myPP
                 { ppCurrent = xmobarStrip . ppCurrent xmobarPP
                 , ppExtras = map (fmap $ fmap xmobarStrip) $ ppExtras myPP
                 }
+				>> fadeInactiveLogHook 0.95
 
 ------------------------------------------------------------------------
 	-- Startup hook
@@ -302,13 +300,11 @@ myLogHook = updatePointer (0.5, 0.5) (0, 0) >>  multiPP myPP myPP
 -- By default, do nothing.
 barCreator sid = let
 	sid' = show $ fromEnum sid in
-	spawnPipe ("xmobar --screen " ++ sid' ++ " ~/.xmonad/xmobarrc")
+	spawnPipe ("xmobar --screen " ++ sid' ++ " ~/.xmonad/xmobar.hs")
 barDestroyer = return ()
 
 myStartupHook = do
 	spawnOnce "~/.xmonad/autostart.sh &"
-	spawnOnce "nitrogen --restore &"
-	spawnOnce "picom --config ~/.config/picom/picom.conf &"
 	dynStatusBarStartup barCreator barDestroyer
 
 ------------------------------------------------------------------------
