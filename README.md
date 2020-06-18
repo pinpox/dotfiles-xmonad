@@ -4,6 +4,8 @@ This repo contains my xmonad configuartion, it is work in progress.
 I will be adding and modifying things until I get everything set up the way I
 want it and hopefully learn some haskell along the way.
 
+![](./scrot.png "Sceenshot")
+
 ## Keybindings
 
 The `Mod` key is set to <kbd>Super</kbd> (Windows key)
@@ -68,8 +70,18 @@ At the moment the following application are configured for autostarting:
 
 xmobar is started separately from the `startupHook` in xmonad's configuration.
 
+## XMobar
+
+The statusbar (`xmobar`) incudes some system information and a workspace
+indicator. The workspace indicator will show only workspaces that have windows
+on them by number. The currently focused workspace on the current screen is highlighted in color,
+workspaces visible (on any screen) are wrapped with `[ ]`, workspaces visible on
+other screens are wrapped with `( )`. The bar is shown on all screens, from the
+respective screen's point of view.
+
 ## Dependencies
 
+- xmobar
 - rofi
 - rofi-pass
 - alacritty
